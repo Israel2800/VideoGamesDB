@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
             developer = "Nintendo"
         )
 
+        // Insert data on table
         lifecycleScope.launch {
             repository.insertGame(game)
         }*/
