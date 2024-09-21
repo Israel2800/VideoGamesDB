@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.israelaguilar.videogamesdb.application.VideoGamesDBApp
 import com.israelaguilar.videogamesdb.data.GameRepository
 import com.israelaguilar.videogamesdb.data.db.model.GameEntity
@@ -17,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private var games: MutableList<GameEntity> = mutableListOf()
     private lateinit var repository: GameRepository
 
+    private lateinit var gameAdapter: GameAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -25,22 +28,40 @@ class MainActivity : AppCompatActivity() {
 
         repository = (application as VideoGamesDBApp).repository
 
-        updateUI()
+        gameAdapter = GameAdapter()
+
+        // Establezco el recyclerview
+        binding.rvGames.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = gameAdapter
+        }
+
+
+
 
         /*val game = GameEntity(
-            title = "Super Mario Galaxy",
-            genre = "Plataformas",
-            developer = "Nintendo"
+            title = "FIFA 23",
+            genre = "Deportes",
+            developer = "EA Sports"
         )
 
         // Insert data on table
         lifecycleScope.launch {
             repository.insertGame(game)
         }*/
+
+        updateUI()
+
     }
 
     fun click(view: View) {
         // Manejamos el click del floating action button
+        val dialog = GameDialog()
+
+        dialog.show(supportFragmentManager, "dialog1")
+
+
+
     }
 
     private fun updateUI(){
@@ -49,6 +70,8 @@ class MainActivity : AppCompatActivity() {
 
             binding.tvSinRegistros.visibility =
                 if(games.isNotEmpty()) View.INVISIBLE else View.VISIBLE
+
+            gameAdapter.updateList(games)
         }
     }
 }
