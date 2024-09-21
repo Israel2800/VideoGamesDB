@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import com.israelaguilar.videogamesdb.R
 import com.israelaguilar.videogamesdb.application.VideoGamesDBApp
 import com.israelaguilar.videogamesdb.data.GameRepository
 import com.israelaguilar.videogamesdb.data.db.model.GameEntity
@@ -33,9 +35,12 @@ class MainActivity : AppCompatActivity() {
 
             // Click al registro de cada juego
 
-            val dialog = GameDialog(newGame = false, game = selectedGame){
+            val dialog = GameDialog(newGame = false, game = selectedGame, updateUI = {
                 updateUI()
-            }
+            }, message = { text ->
+                // Aquí va la función para los mensajes
+                message(text)
+            })
 
             dialog.show(supportFragmentManager, "dialog2")
 
@@ -74,14 +79,35 @@ class MainActivity : AppCompatActivity() {
 
     fun click(view: View) {
         // Manejamos el click del floating action button
-        val dialog = GameDialog{
+        val dialog = GameDialog(updateUI = {
             updateUI()
-        }
+        }, message = { text ->
+            // Aquí va el mensaje
+            message(text)
+
+        })
 
         dialog.show(supportFragmentManager, "dialog1")
 
 
 
+    }
+
+    private fun message(text: String){
+        Toast.makeText(
+            this,
+            text,
+            Toast.LENGTH_SHORT
+        ).show()
+
+        Snackbar.make(
+            binding.cl,
+            text,
+            Snackbar.LENGTH_SHORT
+        )
+            .setTextColor(getColor(R.color.white))
+            .setBackgroundTint(getColor(R.color.snackbar)) // #9E1734
+            .show()
     }
 
     private fun updateUI(){
