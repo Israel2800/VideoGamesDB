@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.israelaguilar.videogamesdb.data.db.model.GameEntity
 import com.israelaguilar.videogamesdb.databinding.GameElementBinding
 
-class GameAdapter(): RecyclerView.Adapter<GameViewHolder>() {
+class GameAdapter(
+    private val onGameClicked: (GameEntity) -> Unit
+): RecyclerView.Adapter<GameViewHolder>() {
 
     private var games: MutableList<GameEntity> = mutableListOf()
 
@@ -27,7 +29,7 @@ class GameAdapter(): RecyclerView.Adapter<GameViewHolder>() {
 
         // Para manejar el click al elemento
         holder.itemView.setOnClickListener {
-
+            onGameClicked(game)
         }
     }
 

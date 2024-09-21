@@ -21,11 +21,13 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 class GameDialog(
+    private val newGame: Boolean = true,
     private var game: GameEntity = GameEntity(
         title = "",
         genre = "",
         developer = ""
-    )
+    ),
+    private val updateUI: () -> Unit
 ): DialogFragment() {
 
     private var _binding: GameDialogBinding? = null
@@ -47,6 +49,116 @@ class GameDialog(
 
         builder = AlertDialog.Builder(requireContext())
 
+        // Establecemos en los text input edit text los valores del objeto game
+
+        binding.apply {
+            tietTitle.setText(game.title)
+            tietGenre.setText(game.genre)
+            tietDeveloper.setText(game.developer)
+        }
+
+        dialog = if(newGame)
+            buildDialog("Guardar", "Cancelar", {
+                // Acción de guardar
+                // Aquí obetenemos los textos ingresados y se los asignamos a nuestro objeto game
+
+                binding.apply {
+                    game.apply {
+                        title = tietTitle.text.toString()
+                        genre = tietGenre.text.toString()
+                        developer = tietDeveloper.text.toString()
+                    }
+                }
+
+                try {
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        repository.insertGame(game)
+                    }
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Juego guardado exitosamente",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+
+                    updateUI()
+
+                }catch (e: IOException){
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al guardar el juego",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+
+            }, {
+                // Acción de cancelar
+
+            })
+        else
+            buildDialog("Actualizar", "Borrar", {
+                // Acción de actualizar
+                // Aquí obetenemos los textos ingresados y se los asignamos a nuestro objeto game
+                binding.apply {
+                    game.apply {
+                        title = tietTitle.text.toString()
+                        genre = tietGenre.text.toString()
+                        developer = tietDeveloper.text.toString()
+                    }
+                }
+
+                try {
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        repository.updateGame(game)
+                    }
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Juego actualizado exitosamente",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+
+                    updateUI()
+
+                }catch (e: IOException){
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al actualizar el juego",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+            }, {
+                // Acción de borrar
+                try {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        repository.deleteGame(game)
+                    }
+                    Toast.makeText(
+                        requireContext(),
+                        "Juego borrado exitosamente",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    updateUI()
+
+                }catch (e: IOException){
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al borrar el juego",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+            })
+
+
+        /*
         dialog = builder.setView(binding.root)
             .setTitle(getString(R.string.game))
             .setPositiveButton("Guardar", DialogInterface.OnClickListener { _, _ ->
@@ -74,6 +186,8 @@ class GameDialog(
                     )
                         .show()
 
+                    updateUI()
+
                 }catch (e: IOException){
                     Toast.makeText(
                         requireContext(),
@@ -88,7 +202,7 @@ class GameDialog(
                 // CLick para el botón negativo
             }
             .create()
-
+        */
         return dialog
 
     }
@@ -181,4 +295,22 @@ class GameDialog(
             textField.addTextChangedListener(textWatcher)
         }
     }
+
+    private fun buildDialog(
+        btn1Text: String,
+        btn2Text: String,
+        positiveButton: () -> Unit,
+        negativeButton: () -> Unit
+    ): Dialog =
+        builder.setView(binding.root)
+            .setTitle(R.string.game)
+            .setPositiveButton(btn1Text){_, _ ->
+                // Acción para el botón positivo
+                positiveButton()
+            } .setNegativeButton(btn2Text){ _, _ ->
+                // Acctión para el botón negativo
+                negativeButton()
+            }
+            .create()
+
 }
